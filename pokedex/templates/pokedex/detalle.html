@@ -1,0 +1,158 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}{{ pokemon.nombre }}{% endblock %}
+
+{% block content %}
+<div class="detalle-hero">
+    <div class="container text-center">
+        <div class="text-white-50 mb-1" style="font-family:monospace">
+            #{{ pokemon.numero|stringformat:"04d" }} ·
+            {{ pokemon.get_generacion_display }} · {{ pokemon.get_anio }}
+        </div>
+        <h1 class="fw-bold">{{ pokemon.nombre }}</h1>
+        <div class="mt-2">
+            {% if pokemon.tipo1 %}
+            <span class="tipo-pill fs-6" style="background:{{ pokemon.tipo1.color }}">{{ pokemon.tipo1.nombre }}</span>
+            {% endif %}
+            {% if pokemon.tipo2 %}
+            <span class="tipo-pill fs-6 ms-1" style="background:{{ pokemon.tipo2.color }}">{{ pokemon.tipo2.nombre }}</span>
+            {% endif %}
+        </div>
+        <img src="{{ pokemon.get_imagen }}" alt="{{ pokemon.nombre }}" class="detalle-img mt-3">
+    </div>
+</div>
+
+<div class="container py-4">
+    <a href="{% url 'lista_pokemon' %}" class="btn btn-outline-secondary btn-sm mb-4">
+        ← Volver al listado
+    </a>
+
+    {% if user.is_authenticated %}
+    <form action="{% url 'toggle_favorito' pokemon.numero %}" method="post" class="d-inline ms-2 mb-4">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-sm {% if es_favorito %}btn-warning{% else %}btn-outline-warning{% endif %}">
+            <i class="bi bi-star{% if es_favorito %}-fill{% endif %}"></i>
+            {% if es_favorito %}Quitar favorito{% else %}Añadir favorito{% endif %}
+        </button>
+    </form>
+    {% endif %}
+
+    <div class="row g-4">
+        <!-- Info -->
+        <div class="col-md-4">
+            <div class="bg-white rounded border p-3">
+                <h5 class="fw-bold mb-3">Información</h5>
+                <table class="table table-sm table-borderless">
+                    <tr><td class="text-muted">Altura</td><td class="fw-semibold">{{ pokemon.altura }} m</td></tr>
+                    <tr><td class="text-muted">Peso</td><td class="fw-semibold">{{ pokemon.peso }} kg</td></tr>
+                    <tr><td class="text-muted">Generación</td><td class="fw-semibold">{{ pokemon.get_generacion_display }}</td></tr>
+                </table>
+                {% if pokemon.descripcion %}
+                <p class="text-muted small mt-2">{{ pokemon.descripcion }}</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Stats -->
+        <div class="col-md-4">
+            <div class="bg-white rounded border p-3">
+                <h5 class="fw-bold mb-3">Estadísticas base</h5>
+                {% for nombre, valor, pct in stats %}
+                <div class="mb-2">
+                    <div class="d-flex justify-content-between" style="font-size:.85rem">
+                        <span class="text-muted">{{ nombre }}</span>
+                        <span class="fw-bold" style="font-family:monospace">{{ valor }}</span>
+                    </div>
+                    <div class="stat-bar">
+                        <div class="stat-fill" style="width:{{ pct }}%"></div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+        </div>
+
+        <!-- Imágenes comunidad -->
+        <div class="col-md-4">
+            <div class="bg-white rounded border p-3">
+                <h5 class="fw-bold mb-3">Imágenes de la comunidad</h5>
+                {% if imagenes %}
+                <div class="row g-2">
+                    {% for img in imagenes %}
+                    <div class="col-6">
+                        <img src="{{ img.imagen.url }}" class="img-fluid rounded"
+                             alt="{{ img.descripcion|default:pokemon.nombre }}"
+                             style="height:90px;width:100%;object-fit:cover">
+                        <div style="font-size:.7rem" class="text-muted mt-1">{{ img.autor.username }}</div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% else %}
+                <p class="text-muted small">Sé el primero en subir una imagen.</p>
+                {% endif %}
+
+                {% if user.is_authenticated %}
+                <hr>
+                <p class="fw-semibold small mb-2">Subir imagen</p>
+                <form action="{% url 'subir_imagen' pokemon.numero %}" method="post"
+                      enctype="multipart/form-data">
+                    {% csrf_token %}
+                    {{ imagen_form.imagen }}
+                    <div class="mt-2">{{ imagen_form.descripcion }}</div>
+                    <button type="submit" class="btn btn-danger btn-sm mt-2 w-100">
+                        <i class="bi bi-upload"></i> Subir
+                    </button>
+                </form>
+                {% else %}
+                <p class="text-muted small mt-2">
+                    <a href="{% url 'login' %}">Inicia sesión</a> para subir imágenes.
+                </p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Comentarios -->
+    <div class="mt-4 bg-white rounded border p-4">
+        <h5 class="fw-bold mb-3">
+            <i class="bi bi-chat-dots"></i> Comentarios ({{ comentarios.count }})
+        </h5>
+
+        {% if comentarios %}
+            {% for c in comentarios %}
+            <div class="comentario-card">
+                <div class="d-flex justify-content-between">
+                    <span class="comentario-autor"><i class="bi bi-person-circle"></i> {{ c.autor.username }}</span>
+                    <span class="comentario-fecha">{{ c.creado_en|date:"d/m/Y H:i" }}</span>
+                </div>
+                <p class="mb-0 mt-1">{{ c.texto }}</p>
+                {% if user == c.autor %}
+                <form action="{% url 'eliminar_comentario' c.pk %}" method="post" class="d-inline">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-link btn-sm text-danger p-0 mt-1">
+                        <i class="bi bi-trash"></i> Eliminar
+                    </button>
+                </form>
+                {% endif %}
+            </div>
+            {% endfor %}
+        {% else %}
+        <p class="text-muted">No hay comentarios aún. ¡Sé el primero!</p>
+        {% endif %}
+
+        {% if user.is_authenticated %}
+        <hr>
+        <h6 class="fw-semibold">Dejar un comentario</h6>
+        <form action="{% url 'comentar' pokemon.numero %}" method="post">
+            {% csrf_token %}
+            {{ comentario_form.texto }}
+            <button type="submit" class="btn btn-danger btn-sm mt-2">
+                <i class="bi bi-send"></i> Publicar
+            </button>
+        </form>
+        {% else %}
+        <p class="text-muted mt-3">
+            <a href="{% url 'login' %}">Inicia sesión</a> para comentar.
+        </p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

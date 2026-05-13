@@ -1,0 +1,31 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Crear cuenta{% endblock %}
+
+{% block content %}
+<div class="auth-card">
+    <div class="pokeball"></div>
+    <h3 class="text-center fw-bold mb-1">Crear cuenta</h3>
+    <p class="text-center text-muted mb-4">Únete y guarda tus Pokémon favoritos</p>
+
+    <form method="post">
+        {% csrf_token %}
+        {% for field in form %}
+        <div class="mb-3">
+            <label class="form-label fw-semibold">{{ field.label }}</label>
+            {{ field }}
+            {% if field.errors %}
+            <div class="text-danger small mt-1">{{ field.errors.0 }}</div>
+            {% endif %}
+        </div>
+        {% endfor %}
+        <button type="submit" class="btn btn-danger w-100 mt-2">
+            <i class="bi bi-person-plus"></i> Crear cuenta
+        </button>
+    </form>
+
+    <p class="text-center mt-4 text-muted">
+        ¿Ya tienes cuenta?
+        <a href="{% url 'login' %}" class="text-danger fw-semibold">Iniciar sesión</a>
+    </p>
+</div>
+{% endblock %}

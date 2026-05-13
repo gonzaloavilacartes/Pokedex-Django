@@ -1,0 +1,80 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Mi Pokédex{% endblock %}
+
+{% block content %}
+<div class="mi-pokedex-header">
+    <div class="container">
+        <h2 class="fw-bold"><i class="bi bi-star-fill text-warning"></i> Mi Pokédex</h2>
+        <p class="mb-0 text-white-50">Entrenador: {{ user.username }}</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    <h4 class="fw-bold mb-3">Mis favoritos ({{ favoritos.count }})</h4>
+    {% if favoritos %}
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+        {% for fav in favoritos %}
+        <div class="col">
+            <a href="{% url 'detalle_pokemon' fav.pokemon.numero %}" class="pokemon-card">
+                <div class="pokemon-num">#{{ fav.pokemon.numero|stringformat:"04d" }}</div>
+                <img src="{{ fav.pokemon.get_sprite }}" alt="{{ fav.pokemon.nombre }}">
+                <div class="pokemon-name">{{ fav.pokemon.nombre }}</div>
+                {% if fav.pokemon.tipo1 %}
+                <span class="tipo-pill" style="background:{{ fav.pokemon.tipo1.color }}">
+                    {{ fav.pokemon.tipo1.nombre }}
+                </span>
+                {% endif %}
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-4 text-muted">
+        <i class="bi bi-star" style="font-size:3rem"></i>
+        <p class="mt-2">Aún no tienes favoritos. ¡Explora la Pokédex y añade algunos!</p>
+        <a href="{% url 'lista_pokemon' %}" class="btn btn-danger">Ver Pokémon</a>
+    </div>
+    {% endif %}
+
+    <!-- Mis comentarios -->
+    <h4 class="fw-bold mt-5 mb-3">Mis últimos comentarios</h4>
+    {% if mis_comentarios %}
+    {% for c in mis_comentarios %}
+    <div class="comentario-card d-flex justify-content-between align-items-start">
+        <div>
+            <a href="{% url 'detalle_pokemon' c.pokemon.numero %}" class="fw-semibold text-danger text-decoration-none">
+                {{ c.pokemon.nombre }}
+            </a>
+            <p class="mb-0 small mt-1">{{ c.texto }}</p>
+            <span class="comentario-fecha">{{ c.creado_en|date:"d/m/Y" }}</span>
+        </div>
+        <form action="{% url 'eliminar_comentario' c.pk %}" method="post">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-sm btn-outline-danger ms-3">
+                <i class="bi bi-trash"></i>
+            </button>
+        </form>
+    </div>
+    {% endfor %}
+    {% else %}
+    <p class="text-muted">No has comentado nada aún.</p>
+    {% endif %}
+
+    <!-- Mis imágenes -->
+    {% if mis_imagenes %}
+    <h4 class="fw-bold mt-5 mb-3">Mis imágenes subidas</h4>
+    <div class="row g-3">
+        {% for img in mis_imagenes %}
+        <div class="col-6 col-md-3 col-lg-2">
+            <a href="{% url 'detalle_pokemon' img.pokemon.numero %}">
+                <img src="{{ img.imagen.url }}" class="img-fluid rounded"
+                     style="height:100px;width:100%;object-fit:cover"
+                     alt="{{ img.pokemon.nombre }}">
+            </a>
+            <div class="small text-muted mt-1">{{ img.pokemon.nombre }}</div>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

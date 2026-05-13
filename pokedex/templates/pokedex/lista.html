@@ -1,0 +1,75 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Todos los Pokémon{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h2 class="fw-bold mb-4">Pokédex
+        <small class="text-muted fs-6 ms-2">{{ total }} pokémon</small>
+    </h2>
+
+    <!-- Filtros -->
+    <div class="filtros-card">
+        <form method="get" class="row g-2 align-items-end">
+            <div class="col-md-4">
+                <label class="form-label fw-semibold" style="font-size:.8rem">BUSCAR</label>
+                <input type="text" name="q" class="form-control"
+                       placeholder="Nombre o número..." value="{{ busqueda }}">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold" style="font-size:.8rem">GENERACIÓN</label>
+                <select name="gen" class="form-select">
+                    <option value="">Todas</option>
+                    {% for num, label in generaciones %}
+                    <option value="{{ num }}" {% if gen_activa == num|stringformat:"s" %}selected{% endif %}>
+                        {{ label }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label fw-semibold" style="font-size:.8rem">TIPO</label>
+                <select name="tipo" class="form-select">
+                    <option value="">Todos</option>
+                    {% for t in tipos %}
+                    <option value="{{ t.id }}" {% if tipo_activo == t.id|stringformat:"s" %}selected{% endif %}>
+                        {{ t.nombre }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-danger w-100">Filtrar</button>
+            </div>
+        </form>
+    </div>
+
+    <!-- Grid -->
+    {% if pokemon %}
+    <div class="row row-cols-2 row-cols-sm-3 row-cols-md-4 row-cols-lg-6 g-3">
+        {% for p in pokemon %}
+        <div class="col">
+            <a href="{% url 'detalle_pokemon' p.numero %}" class="pokemon-card">
+                <div class="pokemon-num">#{{ p.numero|stringformat:"04d" }}</div>
+                <img src="{{ p.get_sprite }}" alt="{{ p.nombre }}" loading="lazy">
+                <div class="pokemon-name">{{ p.nombre }}</div>
+                <div>
+                    {% if p.tipo1 %}
+                    <span class="tipo-pill" style="background:{{ p.tipo1.color }}">{{ p.tipo1.nombre }}</span>
+                    {% endif %}
+                    {% if p.tipo2 %}
+                    <span class="tipo-pill" style="background:{{ p.tipo2.color }}">{{ p.tipo2.nombre }}</span>
+                    {% endif %}
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-search" style="font-size:3rem"></i>
+        <p class="mt-3">No se encontraron Pokémon con ese filtro.</p>
+        <a href="{% url 'lista_pokemon' %}" class="btn btn-outline-danger mt-2">Limpiar filtros</a>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
