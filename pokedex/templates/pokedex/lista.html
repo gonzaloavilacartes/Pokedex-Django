@@ -27,14 +27,32 @@
                 </select>
             </div>
             <div class="col-md-3">
-                <label class="form-label fw-semibold" style="font-size:.8rem">TIPO</label>
-                <select name="tipo" class="form-select">
-                    <option value="">Todos</option>
-                    {% for t in tipos %}
-                    <option value="{{ t.id }}" {% if tipo_activo == t.id|stringformat:"s" %}selected{% endif %}>
-                        {{ t.nombre }}
+                <label class="form-label fw-semibold" style="font-size:.8rem">ORDENAR POR</label>
+                <select name="orden" class="form-select">
+                    <option value="numero"           {% if orden_activo == 'numero' %}selected{% endif %}>
+                        Número (default)
                     </option>
-                    {% endfor %}
+                    <option value="nombre"           {% if orden_activo == 'nombre' %}selected{% endif %}>
+                        Nombre
+                    </option>
+                    <option value="hp"               {% if orden_activo == 'hp' %}selected{% endif %}>
+                        Mayor HP
+                    </option>
+                    <option value="ataque"           {% if orden_activo == 'ataque' %}selected{% endif %}>
+                        Mayor Ataque
+                    </option>
+                    <option value="ataque_especial"  {% if orden_activo == 'ataque_especial' %}selected{% endif %}>
+                        Mayor Ataque Especial
+                    </option>
+                    <option value="defensa"          {% if orden_activo == 'defensa' %}selected{% endif %}>
+                        Mayor Defensa
+                    </option>
+                    <option value="defensa_especial" {% if orden_activo == 'defensa_especial' %}selected{% endif %}>
+                        Mayor Defensa Especial
+                    </option>
+                    <option value="velocidad"        {% if orden_activo == 'velocidad' %}selected{% endif %}>
+                        Mayor Velocidad
+                    </option>
                 </select>
             </div>
             <div class="col-md-2">

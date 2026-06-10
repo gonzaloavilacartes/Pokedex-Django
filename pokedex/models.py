@@ -1,6 +1,26 @@
 from django.db import models
 from django.contrib.auth.models import User
 
+TRADUCCION_TIPOS = {
+    'normal':   'Normal',
+    'fire':     'Fuego',
+    'water':    'Agua',
+    'grass':    'Planta',
+    'electric': 'Eléctrico',
+    'ice':      'Hielo',
+    'fighting': 'Lucha',
+    'poison':   'Veneno',
+    'ground':   'Tierra',
+    'flying':   'Volador',
+    'psychic':  'Psíquico',
+    'bug':      'Bicho',
+    'rock':     'Roca',
+    'ghost':    'Fantasma',
+    'dragon':   'Dragón',
+    'dark':     'Oscuro',
+    'steel':    'Acero',
+    'fairy':    'Hada',
+}
 
 class Tipo(models.Model):
     nombre = models.CharField(max_length=50, unique=True)
@@ -34,9 +54,11 @@ class Pokemon(models.Model):
     altura      = models.FloatField(default=0)
     peso        = models.FloatField(default=0)
     hp          = models.IntegerField(default=0)
-    ataque      = models.IntegerField(default=0)
-    defensa     = models.IntegerField(default=0)
-    velocidad   = models.IntegerField(default=0)
+    ataque           = models.IntegerField(default=0)
+    ataque_especial  = models.IntegerField(default=0)
+    defensa          = models.IntegerField(default=0)
+    defensa_especial = models.IntegerField(default=0)
+    velocidad        = models.IntegerField(default=0)
     generacion  = models.IntegerField(choices=GENERACIONES, default=1)
     tipo1       = models.ForeignKey(
         Tipo, on_delete=models.SET_NULL, null=True,
@@ -100,11 +122,9 @@ class ImagenComunidad(models.Model):
     imagen      = models.ImageField(upload_to='comunidad/')
     descripcion = models.CharField(max_length=200, blank=True)
     subida_en   = models.DateTimeField(auto_now_add=True)
+    aprobada    = models.BooleanField(default=False)  # ← NUEVO
 
     class Meta:
         verbose_name = 'Imagen comunidad'
         verbose_name_plural = 'Imágenes comunidad'
         ordering = ['-subida_en']
-
-    def __str__(self):
-        return f'{self.autor.username} → {self.pokemon.nombre}'

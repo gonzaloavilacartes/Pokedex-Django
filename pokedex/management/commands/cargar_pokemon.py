@@ -23,6 +23,27 @@ COLORES_TIPO = {
     'fairy':    '#EE99AC',
 }
 
+TRADUCCION_TIPOS = {
+    'normal':   'Normal',
+    'fire':     'Fuego',
+    'water':    'Agua',
+    'grass':    'Planta',
+    'electric': 'Eléctrico',
+    'ice':      'Hielo',
+    'fighting': 'Lucha',
+    'poison':   'Veneno',
+    'ground':   'Tierra',
+    'flying':   'Volador',
+    'psychic':  'Psíquico',
+    'bug':      'Bicho',
+    'rock':     'Roca',
+    'ghost':    'Fantasma',
+    'dragon':   'Dragón',
+    'dark':     'Oscuro',
+    'steel':    'Acero',
+    'fairy':    'Hada',
+}
+
 def get_generacion(numero):
     if numero <= 151:  return 1
     if numero <= 251:  return 2
@@ -81,6 +102,7 @@ class Command(BaseCommand):
 
                 data = response.json()
 
+                # Descripción en español
                 descripcion = ''
                 try:
                     sp_resp = requests.get(data['species']['url'], timeout=10)
@@ -92,38 +114,47 @@ class Command(BaseCommand):
                 except Exception:
                     pass
 
+                # Tipos — cada tipo en su propio bloque
                 tipo1_obj = None
                 tipo2_obj = None
+
                 for t in data.get('types', []):
-                    nombre_tipo = t['type']['name']
+                    nombre_en = t['type']['name']
+                    nombre_es = TRADUCCION_TIPOS.get(nombre_en, nombre_en.capitalize())
+                    color     = COLORES_TIPO.get(nombre_en, '#888888')
+
                     tipo_obj, _ = Tipo.objects.get_or_create(
-                        nombre=nombre_tipo,
-                        defaults={'color': COLORES_TIPO.get(nombre_tipo, '#888888')}
+                        nombre=nombre_es,
+                        defaults={'color': color}
                     )
+
                     if t['slot'] == 1:
                         tipo1_obj = tipo_obj
                     elif t['slot'] == 2:
                         tipo2_obj = tipo_obj
 
+                # Stats
                 stats = {s['stat']['name']: s['base_stat'] for s in data.get('stats', [])}
 
                 Pokemon.objects.create(
-                    numero      = numero,
-                    nombre      = data['name'].capitalize(),
-                    descripcion = descripcion,
-                    altura      = data.get('height', 0) / 10,
-                    peso        = data.get('weight', 0) / 10,
-                    hp          = stats.get('hp', 0),
-                    ataque      = stats.get('attack', 0),
-                    defensa     = stats.get('defense', 0),
-                    velocidad   = stats.get('speed', 0),
-                    generacion  = get_generacion(numero),
-                    tipo1       = tipo1_obj,
-                    tipo2       = tipo2_obj,
+                    numero           = numero,
+                    nombre           = data['name'].replace('-', ' ').title(),
+                    descripcion      = descripcion,
+                    altura           = data.get('height', 0) / 10,
+                    peso             = data.get('weight', 0) / 10,
+                    hp               = stats.get('hp', 0),
+                    ataque           = stats.get('attack', 0),
+                    ataque_especial  = stats.get('special-attack', 0),
+                    defensa          = stats.get('defense', 0),
+                    defensa_especial = stats.get('special-defense', 0),
+                    velocidad        = stats.get('speed', 0),
+                    generacion       = get_generacion(numero),
+                    tipo1            = tipo1_obj,
+                    tipo2            = tipo2_obj,
                 )
 
                 self.stdout.write(
-                    self.style.SUCCESS(f'  ✓  #{numero} {data["name"].capitalize()} cargado')
+                    self.style.SUCCESS(f'  ✓  #{numero} {data["name"].title()} cargado')
                 )
                 cargados += 1
 

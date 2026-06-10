@@ -12,6 +12,8 @@ urlpatterns = [
     path('login/',                    views.login_view,       name='login'),
     path('logout/',                   views.logout_view,      name='logout'),
 
+    path('mis-imagenes/', views.mis_imagenes_estado, name='mis_imagenes'),
+
     # Privadas
     path('mi-pokedex/',               views.mi_pokedex,       name='mi_pokedex'),
     path('pokemon/<int:numero>/favorito/',      views.toggle_favorito,     name='toggle_favorito'),

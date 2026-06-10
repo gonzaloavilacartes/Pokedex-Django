@@ -25,6 +25,7 @@ def lista_pokemon(request):
     busqueda   = request.GET.get('q', '').strip()
     generacion = request.GET.get('gen', '')
     tipo_id    = request.GET.get('tipo', '')
+    ordenar    = request.GET.get('orden', '')
 
     if busqueda:
         pokemon = pokemon.filter(
@@ -35,21 +36,35 @@ def lista_pokemon(request):
     if tipo_id:
         pokemon = pokemon.filter(Q(tipo1__id=tipo_id) | Q(tipo2__id=tipo_id))
 
+    ORDEN_OPCIONES = {
+        'numero':           'numero',
+        'nombre':           'nombre',
+        'hp':               '-hp',
+        'ataque':           '-ataque',
+        'ataque_especial':  '-ataque_especial',
+        'defensa':          '-defensa',
+        'defensa_especial': '-defensa_especial',
+        'velocidad':        '-velocidad',
+    }
+    if ordenar in ORDEN_OPCIONES:
+        pokemon = pokemon.order_by(ORDEN_OPCIONES[ordenar])
+
     return render(request, 'pokedex/lista.html', {
-        'pokemon':     pokemon,
-        'tipos':       tipos,
+        'pokemon':      pokemon,
+        'tipos':        tipos,
         'generaciones': Pokemon.GENERACIONES,
-        'busqueda':    busqueda,
-        'gen_activa':  generacion,
-        'tipo_activo': tipo_id,
-        'total':       pokemon.count(),
+        'busqueda':     busqueda,
+        'gen_activa':   generacion,
+        'tipo_activo':  tipo_id,
+        'orden_activo': ordenar,
+        'total':        pokemon.count(),
     })
 
 
 def detalle_pokemon(request, numero):
     pokemon     = get_object_or_404(Pokemon, numero=numero)
     comentarios = pokemon.comentarios.select_related('autor').all()
-    imagenes    = pokemon.imagenes.select_related('autor').all()
+    imagenes = pokemon.imagenes.select_related('autor').filter(aprobada=True)
 
     es_favorito = False
     if request.user.is_authenticated:
@@ -58,10 +73,12 @@ def detalle_pokemon(request, numero):
         ).exists()
 
     stats = [
-        ('HP',        pokemon.hp,        round(pokemon.hp / 255 * 100)),
-        ('Ataque',    pokemon.ataque,     round(pokemon.ataque / 255 * 100)),
-        ('Defensa',   pokemon.defensa,    round(pokemon.defensa / 255 * 100)),
-        ('Velocidad', pokemon.velocidad,  round(pokemon.velocidad / 255 * 100)),
+        ('HP',               pokemon.hp,               round(pokemon.hp / 255 * 100)),
+        ('Ataque',           pokemon.ataque,            round(pokemon.ataque / 255 * 100)),
+        ('Ataque Especial',  pokemon.ataque_especial,   round(pokemon.ataque_especial / 255 * 100)),
+        ('Defensa',          pokemon.defensa,           round(pokemon.defensa / 255 * 100)),
+        ('Defensa Especial', pokemon.defensa_especial,  round(pokemon.defensa_especial / 255 * 100)),
+        ('Velocidad',        pokemon.velocidad,         round(pokemon.velocidad / 255 * 100)),
     ]
 
     return render(request, 'pokedex/detalle.html', {
@@ -119,7 +136,9 @@ def mi_pokedex(request):
         entrenador=request.user
     ).select_related('pokemon', 'pokemon__tipo1', 'pokemon__tipo2')
     mis_comentarios = Comentario.objects.filter(autor=request.user).select_related('pokemon')[:5]
-    mis_imagenes    = ImagenComunidad.objects.filter(autor=request.user).select_related('pokemon')[:6]
+    mis_imagenes = ImagenComunidad.objects.filter(
+    autor=request.user
+).select_related('pokemon')[:6]
     return render(request, 'pokedex/mi_pokedex.html', {
         'favoritos':       favoritos,
         'mis_comentarios': mis_comentarios,
@@ -175,3 +194,12 @@ def subir_imagen(request, numero):
             img.save()
             messages.success(request, 'Imagen subida.')
     return redirect('detalle_pokemon', numero=numero)
+
+
+@login_required
+def mis_imagenes_estado(request):
+    """El usuario ve si sus imágenes fueron aprobadas o están pendientes."""
+    imagenes = ImagenComunidad.objects.filter(
+        autor=request.user
+    ).select_related('pokemon').order_by('-subida_en')
+    return render(request, 'pokedex/mis_imagenes.html', {'imagenes': imagenes})

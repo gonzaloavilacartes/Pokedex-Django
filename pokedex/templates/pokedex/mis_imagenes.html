@@ -1,0 +1,46 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Mis imágenes{% endblock %}
+
+{% block content %}
+<div class="mi-pokedex-header">
+    <div class="container">
+        <h2 class="fw-bold">📷 Mis imágenes subidas</h2>
+        <p class="text-white-50 mb-0">Estado de moderación de tus imágenes</p>
+    </div>
+</div>
+
+<div class="container py-4">
+    {% if imagenes %}
+    <div class="row g-3">
+        {% for img in imagenes %}
+        <div class="col-6 col-md-4 col-lg-3">
+            <div class="bg-white border rounded p-2">
+                <img src="{{ img.imagen.url }}"
+                     class="img-fluid rounded mb-2"
+                     style="height:130px;width:100%;object-fit:cover">
+                <div class="fw-semibold small">
+                    <a href="{% url 'detalle_pokemon' img.pokemon.numero %}"
+                       class="text-danger text-decoration-none">
+                        {{ img.pokemon.nombre }}
+                    </a>
+                </div>
+                {% if img.aprobada %}
+                <span class="badge bg-success mt-1">✓ Aprobada</span>
+                {% else %}
+                <span class="badge bg-warning text-dark mt-1">⏳ Pendiente</span>
+                {% endif %}
+                <div class="text-muted" style="font-size:.72rem">
+                    {{ img.subida_en|date:"d/m/Y" }}
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    {% else %}
+    <div class="text-center py-5 text-muted">
+        <i class="bi bi-images" style="font-size:3rem"></i>
+        <p class="mt-3">No has subido ninguna imagen aún.</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
