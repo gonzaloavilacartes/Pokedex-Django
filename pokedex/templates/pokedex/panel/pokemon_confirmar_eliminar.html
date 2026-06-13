@@ -1,0 +1,28 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Eliminar {{ pokemon.nombre }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:500px">
+    <div class="bg-white border rounded p-4 text-center">
+        <img src="{{ pokemon.get_sprite }}" alt="{{ pokemon.nombre }}"
+             style="width:100px;height:100px;object-fit:contain">
+        <h4 class="fw-bold mt-3">¿Eliminar a {{ pokemon.nombre }}?</h4>
+        <p class="text-muted">
+            Esta acción eliminará permanentemente al pokémon
+            <strong>{{ pokemon.nombre }}</strong> y todos sus comentarios,
+            favoritos e imágenes asociadas.
+        </p>
+        <div class="d-flex gap-2 justify-content-center mt-4">
+            <form method="post">
+                {% csrf_token %}
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-trash"></i> Sí, eliminar
+                </button>
+            </form>
+            <a href="{% url 'panel_lista_pokemon' %}" class="btn btn-outline-secondary">
+                Cancelar
+            </a>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,92 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Gestión de Pokémon{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <a href="{% url 'panel_admin' %}" class="text-muted text-decoration-none small">
+                ← Panel
+            </a>
+            <h3 class="fw-bold mb-0 mt-1">Gestión de Pokémon
+                <small class="text-muted fs-6">{{ total }} registros</small>
+            </h3>
+        </div>
+        <a href="{% url 'panel_crear_pokemon' %}" class="btn btn-danger">
+            <i class="bi bi-plus-circle"></i> Crear nuevo
+        </a>
+    </div>
+
+    <!-- Buscador -->
+    <form method="get" class="mb-4">
+        <div class="input-group" style="max-width:400px">
+            <input type="text" name="q" class="form-control"
+                   placeholder="Buscar por nombre o número..." value="{{ busqueda }}">
+            <button type="submit" class="btn btn-danger">Buscar</button>
+            {% if busqueda %}
+            <a href="{% url 'panel_lista_pokemon' %}" class="btn btn-outline-secondary">✕</a>
+            {% endif %}
+        </div>
+    </form>
+
+    <div class="bg-white border rounded overflow-hidden">
+        <table class="table table-hover mb-0">
+            <thead style="background:#f8f9fa">
+                <tr>
+                    <th>#</th>
+                    <th>Imagen</th>
+                    <th>Nombre</th>
+                    <th>Tipo</th>
+                    <th>Generación</th>
+                    <th>HP</th>
+                    <th>Ataque</th>
+                    <th>Acciones</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for p in pokemon %}
+                <tr>
+                    <td class="text-muted" style="font-family:monospace">{{ p.numero|stringformat:"04d" }}</td>
+                    <td>
+                        <img src="{{ p.get_sprite }}" alt="{{ p.nombre }}"
+                             style="width:40px;height:40px;object-fit:contain">
+                    </td>
+                    <td class="fw-semibold">{{ p.nombre }}</td>
+                    <td>
+                        {% if p.tipo1 %}
+                        <span class="tipo-pill" style="background:{{ p.tipo1.color }}">{{ p.tipo1.nombre }}</span>
+                        {% endif %}
+                        {% if p.tipo2 %}
+                        <span class="tipo-pill ms-1" style="background:{{ p.tipo2.color }}">{{ p.tipo2.nombre }}</span>
+                        {% endif %}
+                    </td>
+                    <td>{{ p.get_generacion_display }}</td>
+                    <td>{{ p.hp }}</td>
+                    <td>{{ p.ataque }}</td>
+                    <td>
+                        <div class="d-flex gap-1">
+                            <a href="{% url 'detalle_pokemon' p.numero %}"
+                               class="btn btn-sm btn-outline-secondary" title="Ver">
+                                <i class="bi bi-eye"></i>
+                            </a>
+                            <a href="{% url 'panel_editar_pokemon' p.numero %}"
+                               class="btn btn-sm btn-outline-primary" title="Editar">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <a href="{% url 'panel_eliminar_pokemon' p.numero %}"
+                               class="btn btn-sm btn-outline-danger" title="Eliminar">
+                                <i class="bi bi-trash"></i>
+                            </a>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="8" class="text-center text-muted py-4">No se encontraron pokémon.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

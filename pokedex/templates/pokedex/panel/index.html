@@ -1,0 +1,71 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}Panel de Administración{% endblock %}
+
+{% block content %}
+<div class="mi-pokedex-header">
+    <div class="container">
+        <h2 class="fw-bold">⚙️ Panel de Administración</h2>
+        <p class="text-white-50 mb-0">Gestión del sistema</p>
+    </div>
+</div>
+
+<div class="container py-4">
+
+    <!-- Tarjetas resumen -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="bg-white border rounded p-3 text-center">
+                <div style="font-size:2rem;font-weight:700;color:#e53935">{{ total_pokemon }}</div>
+                <div class="text-muted small">Pokémon</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white border rounded p-3 text-center">
+                <div style="font-size:2rem;font-weight:700;color:#1a1a2e">{{ total_usuarios }}</div>
+                <div class="text-muted small">Usuarios</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white border rounded p-3 text-center">
+                <div style="font-size:2rem;font-weight:700;color:#f59e0b">{{ imagenes_pend }}</div>
+                <div class="text-muted small">Imágenes pendientes</div>
+            </div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="bg-white border rounded p-3 text-center">
+                <div style="font-size:2rem;font-weight:700;color:#10b981">{{ total_coment }}</div>
+                <div class="text-muted small">Comentarios</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Acciones -->
+    <div class="row g-3">
+        <div class="col-md-6">
+            <div class="bg-white border rounded p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-collection"></i> Pokémon</h5>
+                <div class="d-flex gap-2 flex-wrap">
+                    <a href="{% url 'panel_lista_pokemon' %}" class="btn btn-outline-dark">
+                        <i class="bi bi-list"></i> Ver todos
+                    </a>
+                    <a href="{% url 'panel_crear_pokemon' %}" class="btn btn-danger">
+                        <i class="bi bi-plus-circle"></i> Crear nuevo
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <div class="bg-white border rounded p-4">
+                <h5 class="fw-bold mb-3"><i class="bi bi-images"></i> Moderación de imágenes</h5>
+                <a href="{% url 'panel_imagenes' %}" class="btn btn-warning">
+                    <i class="bi bi-shield-check"></i> Revisar imágenes
+                    {% if imagenes_pend %}
+                    <span class="badge bg-danger ms-1">{{ imagenes_pend }}</span>
+                    {% endif %}
+                </a>
+            </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

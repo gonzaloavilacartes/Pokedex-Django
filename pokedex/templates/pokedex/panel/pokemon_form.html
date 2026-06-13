@@ -1,0 +1,105 @@
+{% extends 'pokedex/base.html' %}
+{% block title %}{{ titulo }}{% endblock %}
+
+{% block content %}
+<div class="container py-4" style="max-width:800px">
+    <a href="{% url 'panel_lista_pokemon' %}" class="text-muted text-decoration-none small">
+        ← Volver a la lista
+    </a>
+    <h3 class="fw-bold mt-2 mb-4">{{ titulo }}</h3>
+
+    <div class="bg-white border rounded p-4">
+        <form method="post" novalidate>
+            {% csrf_token %}
+
+            <!-- Info básica -->
+            <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.78rem;letter-spacing:.08em">
+                Información básica
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-3">
+                    <label class="form-label fw-semibold">{{ form.numero.label }}</label>
+                    {{ form.numero }}
+                    {% if form.numero.errors %}
+                    <div class="text-danger small mt-1">{{ form.numero.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-5">
+                    <label class="form-label fw-semibold">{{ form.nombre.label }}</label>
+                    {{ form.nombre }}
+                    {% if form.nombre.errors %}
+                    <div class="text-danger small mt-1">{{ form.nombre.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.generacion.label }}</label>
+                    {{ form.generacion }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.tipo1.label }}</label>
+                    {{ form.tipo1 }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.tipo2.label }}</label>
+                    {{ form.tipo2 }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.altura.label }}</label>
+                    {{ form.altura }}
+                </div>
+                <div class="col-md-6">
+                    <label class="form-label fw-semibold">{{ form.peso.label }}</label>
+                    {{ form.peso }}
+                </div>
+                <div class="col-12">
+                    <label class="form-label fw-semibold">{{ form.descripcion.label }}</label>
+                    {{ form.descripcion }}
+                </div>
+            </div>
+
+            <!-- Estadísticas -->
+            <h6 class="fw-bold text-muted text-uppercase mb-3" style="font-size:.78rem;letter-spacing:.08em">
+                Estadísticas base
+            </h6>
+            <div class="row g-3 mb-4">
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.hp.label }}</label>
+                    {{ form.hp }}
+                    {% if form.hp.errors %}
+                    <div class="text-danger small mt-1">{{ form.hp.errors.0 }}</div>
+                    {% endif %}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.ataque.label }}</label>
+                    {{ form.ataque }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.ataque_especial.label }}</label>
+                    {{ form.ataque_especial }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.defensa.label }}</label>
+                    {{ form.defensa }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.defensa_especial.label }}</label>
+                    {{ form.defensa_especial }}
+                </div>
+                <div class="col-md-4">
+                    <label class="form-label fw-semibold">{{ form.velocidad.label }}</label>
+                    {{ form.velocidad }}
+                </div>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-danger">
+                    <i class="bi bi-check-circle"></i> {{ accion }}
+                </button>
+                <a href="{% url 'panel_lista_pokemon' %}" class="btn btn-outline-secondary">
+                    Cancelar
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+{% endblock %}

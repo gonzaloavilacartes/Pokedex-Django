@@ -20,39 +20,69 @@
         <div class="collapse navbar-collapse" id="navMenu">
             <ul class="navbar-nav me-auto">
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'index' %}">Inicio</a>
-                </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'lista_pokemon' %}">Pokédex</a>
-                </li>
-                {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'mi_pokedex' %}">
-                        <i class="bi bi-star-fill text-warning"></i> Mi Pokédex
+                    <a class="nav-link" href="{% url 'index' %}">
+                        <i class="bi bi-house"></i> Inicio
                     </a>
                 </li>
-                {% endif %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'lista_pokemon' %}">
+                        <i class="bi bi-list-ul"></i> Pokédex
+                    </a>
+                </li>
             </ul>
-            <ul class="navbar-nav">
+
+            <ul class="navbar-nav align-items-lg-center gap-2">
                 {% if user.is_authenticated %}
-                <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" data-bs-toggle="dropdown">
-                        <i class="bi bi-person-circle"></i> {{ user.username }}
-                    </a>
-                    <ul class="dropdown-menu dropdown-menu-end">
-                        <li><a class="dropdown-item" href="{% url 'mi_pokedex' %}">Mi Pokédex</a></li>
-                        <li><a class="dropdown-item" href="{% url 'mis_imagenes' %}">Mis imágenes</a></li>
-                        <li><hr class="dropdown-divider"></li>
-                        <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">Cerrar sesión</a></li>
-                    </ul>
-                </li>
+
+                    {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-pill nav-pill-admin" href="{% url 'panel_admin' %}">
+                            <i class="bi bi-gear-fill"></i> Panel admin
+                        </a>
+                    </li>
+                    {% endif %}
+
+                    <li class="nav-item">
+                        <a class="nav-pill nav-pill-fav" href="{% url 'mi_pokedex' %}">
+                            <i class="bi bi-star-fill"></i> Mi Pokédex
+                        </a>
+                    </li>
+
+                    <li class="nav-item d-none d-lg-block">
+                        <div class="navbar-divider"></div>
+                    </li>
+
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle d-flex align-items-center gap-2" href="#" data-bs-toggle="dropdown">
+                            <span class="user-avatar">{{ user.username|slice:":1"|upper }}</span>
+                            {{ user.username }}
+                        </a>
+                        <ul class="dropdown-menu dropdown-menu-end">
+                            <li><a class="dropdown-item" href="{% url 'mi_pokedex' %}">
+                                <i class="bi bi-star"></i> Mi Pokédex
+                            </a></li>
+                            <li><a class="dropdown-item" href="{% url 'mis_imagenes' %}">
+                                <i class="bi bi-images"></i> Mis imágenes
+                            </a></li>
+                            {% if user.is_staff %}
+                            <li><a class="dropdown-item" href="{% url 'panel_admin' %}">
+                                <i class="bi bi-gear"></i> Panel admin
+                            </a></li>
+                            {% endif %}
+                            <li><hr class="dropdown-divider"></li>
+                            <li><a class="dropdown-item text-danger" href="{% url 'logout' %}">
+                                <i class="bi bi-box-arrow-right"></i> Cerrar sesión
+                            </a></li>
+                        </ul>
+                    </li>
+
                 {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
-                </li>
-                <li class="nav-item">
-                    <a class="btn btn-danger btn-sm ms-2 mt-1" href="{% url 'registro' %}">Registrarse</a>
-                </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="{% url 'login' %}">Iniciar sesión</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="btn btn-danger btn-sm" href="{% url 'registro' %}">Registrarse</a>
+                    </li>
                 {% endif %}
             </ul>
         </div>

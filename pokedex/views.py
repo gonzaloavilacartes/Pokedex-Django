@@ -1,3 +1,4 @@
+from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib.auth import login, logout
 from django.contrib.auth.decorators import login_required
@@ -6,6 +7,8 @@ from django.db.models import Q
 
 from .models import Pokemon, Tipo, Favorito, Comentario, ImagenComunidad
 from .forms import RegistroForm, LoginForm, ComentarioForm, ImagenForm
+from django.contrib.auth.models import User
+
 
 
 
@@ -203,3 +206,113 @@ def mis_imagenes_estado(request):
         autor=request.user
     ).select_related('pokemon').order_by('-subida_en')
     return render(request, 'pokedex/mis_imagenes.html', {'imagenes': imagenes})
+
+# ── Panel administrador propio ───────────────────────────────────
+
+@staff_member_required(login_url='/login/')
+def panel_admin(request):
+    total_pokemon  = Pokemon.objects.count()
+    total_usuarios = User.objects.count()
+    imagenes_pend  = ImagenComunidad.objects.filter(aprobada=False).count()
+    total_coment   = Comentario.objects.count()
+    return render(request, 'pokedex/panel/index.html', {
+        'total_pokemon':  total_pokemon,
+        'total_usuarios': total_usuarios,
+        'imagenes_pend':  imagenes_pend,
+        'total_coment':   total_coment,
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_crear_pokemon(request):
+    from .forms import PokemonForm
+    if request.method == 'POST':
+        form = PokemonForm(request.POST)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'Pokémon creado correctamente.')
+            return redirect('panel_admin')
+        else:
+            messages.error(request, 'Corrige los errores del formulario.')
+    else:
+        form = PokemonForm()
+    return render(request, 'pokedex/panel/pokemon_form.html', {
+        'form':   form,
+        'titulo': 'Crear Pokémon',
+        'accion': 'Crear',
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_editar_pokemon(request, numero):
+    from .forms import PokemonForm
+    pokemon = get_object_or_404(Pokemon, numero=numero)
+    if request.method == 'POST':
+        form = PokemonForm(request.POST, instance=pokemon)
+        if form.is_valid():
+            form.save()
+            messages.success(request, f'{pokemon.nombre} actualizado correctamente.')
+            return redirect('panel_admin')
+        else:
+            messages.error(request, 'Corrige los errores del formulario.')
+    else:
+        form = PokemonForm(instance=pokemon)
+    return render(request, 'pokedex/panel/pokemon_form.html', {
+        'form':    form,
+        'titulo':  f'Editar — {pokemon.nombre}',
+        'accion':  'Guardar cambios',
+        'pokemon': pokemon,
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_eliminar_pokemon(request, numero):
+    pokemon = get_object_or_404(Pokemon, numero=numero)
+    if request.method == 'POST':
+        nombre = pokemon.nombre
+        pokemon.delete()
+        messages.success(request, f'{nombre} eliminado correctamente.')
+        return redirect('panel_admin')
+    return render(request, 'pokedex/panel/pokemon_confirmar_eliminar.html', {
+        'pokemon': pokemon,
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_lista_pokemon(request):
+    busqueda = request.GET.get('q', '').strip()
+    pokemon  = Pokemon.objects.select_related('tipo1', 'tipo2').all()
+    if busqueda:
+        pokemon = pokemon.filter(Q(nombre__icontains=busqueda) | Q(numero__icontains=busqueda))
+    return render(request, 'pokedex/panel/pokemon_lista.html', {
+        'pokemon':  pokemon,
+        'busqueda': busqueda,
+        'total':    pokemon.count(),
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_imagenes(request):
+    pendientes = ImagenComunidad.objects.filter(aprobada=False).select_related('autor', 'pokemon')
+    aprobadas  = ImagenComunidad.objects.filter(aprobada=True).select_related('autor', 'pokemon')
+    return render(request, 'pokedex/panel/imagenes.html', {
+        'pendientes': pendientes,
+        'aprobadas':  aprobadas,
+    })
+
+
+@staff_member_required(login_url='/login/')
+def panel_aprobar_imagen(request, pk):
+    imagen = get_object_or_404(ImagenComunidad, pk=pk)
+    imagen.aprobada = True
+    imagen.save()
+    messages.success(request, 'Imagen aprobada.')
+    return redirect('panel_imagenes')
+
+
+@staff_member_required(login_url='/login/')
+def panel_rechazar_imagen(request, pk):
+    imagen = get_object_or_404(ImagenComunidad, pk=pk)
+    imagen.delete()
+    messages.info(request, 'Imagen rechazada y eliminada.')
+    return redirect('panel_imagenes')
